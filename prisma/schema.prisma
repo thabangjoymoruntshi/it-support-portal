@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output ="../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+model User {
+  id              Int             @id @default(autoincrement())
+  name            String
+  email           String          @unique
+  password        String
+  role            UserRole        @default(CUSTOMER)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  assignedTickets Ticket[]        @relation("AssignedTickets")
+  tickets         Ticket[]        @relation("CustomerTickets")
+  messages        TicketMessage[]
+}
+
+model Ticket {
+  id           Int             @id @default(autoincrement())
+  ticketNumber String          @unique
+  subject      String
+  description  String
+  status       TicketStatus    @default(NEW)
+  priority     TicketPriority  @default(MEDIUM)
+  category     String
+  device       String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  resolvedAt   DateTime?
+  customerId   Int
+  assignedToId Int?
+  attachments  Attachment[]
+  assignedTo   User?           @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  customer     User            @relation("CustomerTickets", fields: [customerId], references: [id])
+  messages     TicketMessage[]
+}
+
+model TicketMessage {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+  ticketId  Int
+  senderId  Int
+  sender    User     @relation(fields: [senderId], references: [id])
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  fileName  String
+  fileUrl   String
+  createdAt DateTime @default(now())
+  ticketId  Int
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model KnowledgeArticle {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  category  String
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  CUSTOMER
+  SUPPORT
+  ADMIN
+}
+
+enum TicketStatus {
+  NEW
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
