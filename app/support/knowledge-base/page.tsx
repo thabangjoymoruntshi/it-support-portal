@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-
+import Link from "next/link";
 type Article = {
   id: number;
   title: string;
@@ -108,6 +108,15 @@ export default function SupportKnowledgeBasePage() {
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-white">
       <div className="mx-auto max-w-7xl">
         <div>
+
+          <Link
+                    href="/support"
+                    className="text-sm text-green-400 hover:text-green-300"
+                  >
+                    ← Back to Support Dashboard
+                  </Link>
+
+
           <p className="text-sm font-medium text-emerald-400">
             Support Management
           </p>

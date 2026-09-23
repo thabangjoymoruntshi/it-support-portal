@@ -1,10 +1,63 @@
+"use client";
+
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SupportLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "loading") {
+      return;
+    }
+
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+
+    if (
+      session.user?.role !== "SUPPORT" &&
+      session.user?.role !== "ADMIN"
+    ) {
+      router.replace("/login");
+    }
+  }, [session, status, router]);
+
+  async function handleSignOut() {
+    await signOut({
+      callbackUrl: "/login",
+    });
+  }
+
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-white">
+        <p className="text-sm text-zinc-400">
+          Checking authentication...
+        </p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
+
+  if (
+    session.user?.role !== "SUPPORT" &&
+    session.user?.role !== "ADMIN"
+  ) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="flex min-h-screen flex-col md:flex-row">
@@ -48,15 +101,13 @@ export default function SupportLayout({
               >
                 Support Users
               </Link>
-
-               
             </div>
           </nav>
         </aside>
 
         <div className="flex-1">
           <header className="border-b border-zinc-800 bg-zinc-950 px-6 py-5 md:px-10">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-6">
               <div>
                 <p className="text-sm text-zinc-500">
                   Avenqora IT Support
@@ -67,10 +118,19 @@ export default function SupportLayout({
                 </h2>
               </div>
 
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 font-bold text-zinc-950">
-                ST
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500 font-bold text-zinc-950">
+                  ST
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="rounded-xl border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:border-red-500 hover:bg-red-500/10 hover:text-red-400"
+                >
+                  Sign Out
+                </button>
               </div>
-              
             </div>
           </header>
 

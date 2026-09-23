@@ -169,6 +169,8 @@ export default function SupportDashboard() {
                       {ticket.status}
                     </span>
                   </div>
+
+
                 </div>
               </Link>
             ))
